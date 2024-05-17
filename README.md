@@ -25,8 +25,8 @@ if ! ip a show dev $interface > /dev/null 2>&1; then
     exit 1
 fi
 
-# Изменение IP-адреса
-ip addr replace $new_ip dev $interface
+# Изменение IP-адреса путем редактирования файла сетевой конфигурации
+sed -i "/^address/s/.*/address $new_ip/" /etc/sysconfig/network-scripts/ifcfg-enp1s0
 
 if [ $? -eq 0 ]; then
     echo "Успешно изменили IP-адрес на $new_ip для интерфейса $interface."
@@ -36,3 +36,10 @@ else
     echo "Ошибка: не удалось изменить IP-адрес для интерфейса $interface."
     exit 1
 fi
+
+# Перезагрузка сетевого интерфейса
+ifdown $interface && ifup $interface
+
+# Вывод информации о текущей сетевой конфигурации
+echo "Текущая сетевая конфигурация для интерфейса $interface:"
+ip addr show $interface
