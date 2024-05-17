@@ -5,7 +5,7 @@ LOG_FILE="/var/log/change_ip_address.log"
 exec > >(tee -a ${LOG_FILE} )
 exec 2>&1
 
-# Check of user rights
+#Check of user rights
 if [ "$(id -u)" -ne 0 ]; then
     echo "Error: need root." >&2
     exit 1
@@ -31,6 +31,7 @@ sed -i "/^address/s/.*/address $new_ip/" /etc/sysconfig/network-scripts/ifcfg-en
 
 if [ $? -eq 0 ]; then
     echo "Successeful changing of ip address with $new_ip on interface $interface."
+
 #Current netconf state
     ip a show dev $interface
 else
