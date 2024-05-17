@@ -1,46 +1,46 @@
 #!/bin/bash
 
-# Логирование действий
+#logging
 LOG_FILE="/var/log/change_ip_address.log"
 exec > >(tee -a ${LOG_FILE} )
 exec 2>&1
 
-# Проверка наличия необходимых прав доступа
+# Check of user rights
 if [ "$(id -u)" -ne 0 ]; then
-    echo "Ошибка: Необходимы права суперпользователя для выполнения скрипта." >&2
+    echo "Error: need root." >&2
     exit 1
 fi
 
-# Проверка передачи аргументов
+#Check of arguments transfer
 if [ "$#" -ne 2 ]; then
-    echo "Использование: $0 <interface> <new_ip_address>"
+    echo "Usage: $0 <interface> <new_ip_address>"
     exit 1
 fi
 
 interface=$1
 new_ip=$2
 
-# Проверка существования сетевого интерфейса
+#Check if network enterface exists
 if ! ip a show dev $interface > /dev/null 2>&1; then
-    echo "Ошибка: Сетевой интерфейс $interface не найден."
+    echo "Error: network interface $interface not found."
     exit 1
 fi
 
-# Изменение IP-адреса путем редактирования файла сетевой конфигурации
+#Changing ip with sed editor
 sed -i "/^address/s/.*/address $new_ip/" /etc/sysconfig/network-scripts/ifcfg-enp1s0
 
 if [ $? -eq 0 ]; then
-    echo "Успешно изменили IP-адрес на $new_ip для интерфейса $interface."
-    # Вывод информации о текущей сетевой конфигурации
+    echo "Successeful changing of ip address with $new_ip on interface $interface."
+#Current netconf state
     ip a show dev $interface
 else
-    echo "Ошибка: не удалось изменить IP-адрес для интерфейса $interface."
+    echo "Error: cannot change ip address on interface $interface."
     exit 1
 fi
 
-# Перезагрузка сетевого интерфейса
+#Network interface reboot
 ifdown $interface && ifup $interface
 
-# Вывод информации о текущей сетевой конфигурации
-echo "Текущая сетевая конфигурация для интерфейса $interface:"
+#Print current state of netconf for network interface 
+echo "Current state of netconf for network interface $interface:"
 ip addr show $interface
