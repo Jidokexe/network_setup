@@ -45,4 +45,3 @@ ifdown $interface && ifup $interface
 #Print current state of netconf for network interface 
 echo "Current state of netconf for network interface $interface:"
 ip addr show $interface
-.
